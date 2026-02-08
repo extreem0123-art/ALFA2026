@@ -1,0 +1,2017 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RED 2026</title>
+    <!-- 🔗 Подключение Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Digital+7&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Tektur:wght@400..900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* 🎛️ Глобальные CSS-переменные — только тёмная тема */
+      :root {
+        --bg: url("img/rgb3.png") center/cover no-repeat;
+        --text: #ffffff;
+        --muted: #9ca3af;
+        --accent: #fc3f1d;
+        --card-bg: #1f2937;
+        --border: #000000;
+        --input-bg: #374151;
+        --modal-bg: #1f2937;
+        --header-bg-image: url("");
+        --header-bg-opacity: 0.3;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        overflow-x: hidden;
+        position: relative;
+      }
+      body {
+        font-family: "Verdana", "Tektur", "Inter", sans-serif;
+        color: var(--text);
+        line-height: 1.6;
+        background: var(--bg);
+      }
+      /* 🌆 Эффект "дождя городов" */
+      .city-rain {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: -1;
+      }
+      .city-drop {
+        position: absolute;
+        color: rgb(68, 255, 0);
+        font-weight: bold;
+        opacity: 0;
+        letter-spacing: 1px;
+        transform: translateY(100vh);
+        will-change: transform;
+      }
+      .city-letter {
+        display: block;
+        text-align: center;
+        opacity: 0;
+        animation: type-in 0.25s forwards ease-out;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      }
+      @keyframes type-in {
+        to {
+          opacity: 1;
+        }
+      }
+      .container {
+        width: 100%;
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 16px;
+      }
+      /* 🏛️ Блок заголовка */
+      .header {
+        padding: 40px 0 24px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        border-bottom: 0px solid var(--border);
+        font-size: 28px;
+      }
+      .header::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--header-bg-image) center/cover no-repeat;
+        z-index: -1;
+      }
+      .header::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, var(--header-bg-opacity));
+        z-index: -1;
+        backdrop-filter: blur(0px);
+      }
+      .logo {
+        margin-bottom: 24px;
+      }
+      .logo img {
+        max-width: 100%;
+        max-height: 120px;
+        height: auto;
+        display: inline-block;
+      }
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .header .header__title,
+      .header .header__tagline,
+      .header .ticker {
+        opacity: 0;
+        animation: fadeInUp 0.8s ease-out forwards;
+        font-family: "Tektur", "Inter", sans-serif;
+        font-size: 24px;
+        font-weight: 600;
+      }
+      .header .header__title {
+        animation-delay: 0.1s;
+      }
+      .header .header__tagline {
+        animation-delay: 0.3s;
+      }
+      .header .ticker {
+        animation-delay: 0.7s;
+      }
+      .header__title {
+        margin: 0;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--accent);
+        outline: none;
+        border: none;
+      }
+      /* 📢 Бегущая строка */
+      .ticker {
+        width: 100%;
+        overflow: hidden;
+        white-space: nowrap;
+        background: none;
+        padding: 12px 0;
+        margin: 16px 0;
+        position: relative;
+        box-shadow: inset 0 0 10px rgba(252, 63, 29, 0);
+      }
+      .ticker-wrapper {
+        display: inline-flex;
+        white-space: nowrap;
+        will-change: transform;
+      }
+      .ticker-content {
+        display: inline-flex;
+        align-items: center;
+        font-family: "Verdana", "DS-Digital", "Tektur", "Digital 7", monospace;
+        font-size: 24px;
+        color: #ffffff;
+        letter-spacing: 0px;
+        text-shadow:
+          0 0 0px #ffffff,
+          0 0 0px #ffffff;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .ticker-content img {
+        display: inline-block;
+        vertical-align: middle;
+      }
+      .ticker-wrapper {
+        animation: ticker-scroll 20s linear infinite;
+      }
+      @keyframes ticker-scroll {
+        0% {
+          transform: translateX(0);
+        }
+        100% {
+          transform: translateX(-50%);
+        }
+      }
+      /* Расписание */
+      .schedule {
+        padding: 24px 0;
+        display: none;
+      }
+      .schedule.active {
+        display: block;
+      }
+      .schedule__header {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+      .schedule__title {
+        font-size: 2rem;
+        margin: 0;
+        color: var(--text);
+        text-align: center;
+      }
+      .schedule__item.hidden {
+        display: none;
+      }
+      .schedule__list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 10px;
+        font-size: 18px;
+      }
+      .schedule__empty {
+        margin: 16px 0;
+        color: var(--muted);
+      }
+      .schedule__item {
+        background: rgba(31, 41, 55, 0.4);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.126);
+        border-radius: 40px;
+        padding: 16px;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 16px;
+        align-items: start;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      }
+      .schedule__item::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.1),
+          transparent
+        );
+        transition: left 0.5s ease;
+      }
+      .schedule__item:hover::before {
+        left: 100%;
+      }
+      .schedule__item:hover {
+        background: rgba(31, 41, 55, 0.5);
+        border-color: rgba(252, 63, 29, 0.5);
+        box-shadow:
+          0 12px 40px 0 rgba(252, 63, 29, 0.2),
+          0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        transform: translateY(-2px);
+      }
+      .schedule__time {
+        font-weight: 700;
+        white-space: nowrap;
+        color: var(--accent);
+        font-size: 26px;
+        line-height: 1.3;
+        min-width: 110px;
+        padding-right: 8px;
+      }
+      .schedule__info {
+        min-width: 0;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+      }
+      .schedule__titleText {
+        margin: 0 0 4px;
+        font-weight: 700;
+        word-break: break-word;
+      }
+      .schedule__topics {
+        margin: 0;
+        font-size: 14px;
+        color: var(--muted);
+        word-break: break-word;
+      }
+      .schedule__open {
+        border: none;
+        background-color: var(--accent);
+        color: rgb(255, 255, 255);
+        padding: 10px 18px;
+        border-radius: 50px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+        box-shadow: 0 4px 12px rgba(252, 63, 29, 0.25);
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        align-self: center;
+      }
+      .schedule__open:hover {
+        background-color: #e03512;
+        transform: translateY(1px) scale(0.99);
+        box-shadow: 0 2px 6px rgba(252, 63, 29, 0.35);
+      }
+      .schedule__open:active {
+        transform: translateY(2px) scale(0.98);
+        box-shadow: 0 1px 3px rgba(252, 63, 29, 0.4);
+        background-color: #c92b0f;
+      }
+      .schedule__open::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 50px;
+        background: radial-gradient(
+          circle at center,
+          rgba(255, 255, 255, 0.4),
+          transparent 70%
+        );
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+      }
+      .schedule__open:hover::before {
+        opacity: 1;
+      }
+      .schedule__item--break {
+        grid-template-columns: 1fr;
+        text-align: center;
+        background: rgba(55, 65, 81, 0.3);
+        border-radius: 40px;
+      }
+      .schedule__item--break:hover {
+        background: rgba(55, 65, 81, 0.4);
+      }
+      /* 🪟 Модальное окно */
+      .modal {
+        position: fixed;
+        inset: 0;
+        display: none;
+        z-index: 1000;
+      }
+      .modal.is-open {
+        display: block;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      @keyframes scaleIn {
+        from {
+          opacity: 0;
+          transform: translate(-50%, -50%) scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1);
+        }
+      }
+      .modal__overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        animation: fadeIn 0.12s ease-out;
+      }
+      .modal__dialog {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%) scale(0.98);
+        background: var(--modal-bg);
+        width: min(720px, 92vw);
+        max-height: 86vh;
+        border-radius: 50px;
+        box-shadow: 0 18px 60px rgba(0, 0, 0, 0.18);
+        padding: 16px;
+        overflow: auto;
+        animation: scaleIn 0.12s ease-out forwards;
+      }
+      .modal__close {
+        position: sticky;
+        top: 0;
+        margin-left: auto;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 30px;
+        border: 1px solid var(--border);
+        background: var(--card-bg);
+        cursor: pointer;
+        font-size: 22px;
+        font-weight: 700;
+      }
+      .modal__title {
+        margin: 12px 0 8px;
+        font-size: 20px;
+      }
+      .modal__content {
+        padding-bottom: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: 20px;
+      }
+      /* ✅ УЛУЧШЕННАЯ 3D КАРУСЕЛЬ */
+      .carousel-expanded {
+        position: relative;
+        width: 100%;
+        height: 420px;
+        margin: 24px 0;
+        overflow: hidden;
+        perspective: 1000px;
+      }
+      .carousel-expanded__list {
+        display: flex;
+        gap: 16px;
+        padding: 16px 0;
+        transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        transform-style: preserve-3d;
+        scroll-behavior: smooth;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        touch-action: pan-y;
+        cursor: grab;
+      }
+      .carousel-expanded__list:active {
+        cursor: grabbing;
+      }
+      .carousel-expanded__list::-webkit-scrollbar {
+        display: none;
+      }
+
+      /* 💡 Центрирование при одном слайде */
+      .carousel--single {
+        justify-content: center !important;
+        padding: 16px 0;
+      }
+      .carousel--single .carousel-expanded__slide {
+        transform: none !important;
+        opacity: 1 !important;
+        margin: 0 !important;
+        flex: 0 0 280px !important;
+      }
+
+      .carousel-expanded__slide {
+        flex: 0 0 280px;
+        height: 360px;
+        border-radius: 16px;
+        background: #ffffff no-repeat center 20% / cover;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        box-shadow: 0 6px 16px rgba(255, 255, 255, 0.08);
+        transform: rotateY(-15deg) scale(0.9);
+        opacity: 0.7;
+      }
+      .carousel-expanded__slide.active {
+        flex: 0 0 460px;
+        height: 400px;
+        transform: rotateY(0) scale(1.05) translateY(-10px);
+        opacity: 1;
+        z-index: 10;
+        box-shadow: 0 16px 40px rgba(252, 63, 29, 0.25);
+      }
+      .carousel-expanded__slide::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(transparent, rgba(255, 255, 255, 0.01));
+        transition: opacity 0.3s;
+      }
+      .carousel-expanded__slide:hover::after {
+        opacity: 0.9;
+      }
+      .carousel-expanded__content {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        padding: 0 24px 24px;
+        color: white;
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      }
+      .carousel-expanded__slide:hover .carousel-expanded__content,
+      .carousel-expanded__slide.active .carousel-expanded__content {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .carousel-expanded__content h4 {
+        font-size: 20px;
+        font-weight: 700;
+        margin: 0 0 6px;
+        color: #ffffff;
+        text-shadow:
+          0 0 4px rgb(255, 0, 0),
+          0 0 8px rgb(255, 255, 255),
+          0 1px 2px rgb(255, 0, 0);
+      }
+      .carousel-expanded__content p {
+        font-size: 14px;
+        margin: 0;
+        color: #ffffff;
+        text-shadow:
+          0 0 4px rgb(255, 0, 0),
+          0 0 8px rgb(255, 255, 255),
+          0 1px 2px rgb(255, 0, 0);
+        opacity: 0;
+        transform: translateY(10px);
+        transition:
+          opacity 0.3s ease 0.1s,
+          transform 0.3s ease 0.1s;
+        text-shadow: 0 0 3px rgb(0, 0, 0);
+      }
+      .carousel-expanded__slide:hover .carousel-expanded__content p,
+      .carousel-expanded__slide.active .carousel-expanded__content p {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .carousel-indicators {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 20px;
+      }
+      .carousel-indicator {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--muted);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+      }
+      .carousel-indicator.active {
+        background: var(--accent);
+        transform: scale(1.2);
+        border-color: var(--accent);
+      }
+      /* ⏳ Таймер */
+      .timer {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        padding: 16px;
+        background: rgba(0, 0, 0, 0);
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0);
+        backdrop-filter: blur(4px);
+        margin: 20px auto;
+        max-width: 600px;
+      }
+      .timer__item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 60px;
+      }
+      .timer__num {
+        font-family: "DS-Digital", "Tektur", "Digital 7", monospace;
+        font-size: 48px;
+        color: var(--accent);
+        line-height: 1;
+        text-shadow: 0 0 10px rgba(252, 63, 29, 0.7);
+      }
+      .timer__label {
+        font-family: "DS-Digital", "Tektur", "Digital 7", monospace;
+        font-size: 16px;
+        color: var(--accent);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      /* ❓ FAQ */
+      .faq {
+        padding: 24px 0;
+      }
+      .faq__list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin: 16px 0;
+      }
+      .faq-item {
+        background: rgba(31, 41, 55, 0.4);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.126);
+        border-radius: 12px;
+        overflow: hidden;
+        position: relative;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      }
+      .faq-item::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.1),
+          transparent
+        );
+        transition: left 0.5s ease;
+        z-index: 0;
+        pointer-events: none;
+      }
+      .faq-item:hover::before {
+        left: 100%;
+      }
+      .faq-item:hover {
+        background: rgba(31, 41, 55, 0.5);
+        border-color: rgba(252, 63, 29, 0.5);
+        box-shadow:
+          0 12px 40px 0 rgba(252, 63, 29, 0.2),
+          0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        transform: translateY(-2px);
+      }
+      .faq-item__question {
+        width: 100%;
+        padding: 14px 18px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 20px;
+        background: transparent;
+        border: none;
+        color: var(--text);
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-family: "DS-Digital", "Tektur", sans-serif;
+        transition: background 0.2s ease;
+        position: relative;
+        z-index: 1;
+      }
+      .faq-item__question:hover {
+        background: rgba(252, 63, 29, 0.05);
+      }
+      .faq-item__question:focus {
+        outline: 2px solid var(--accent);
+        border-radius: 8px;
+      }
+      .faq-item__icon {
+        font-size: 1.2em;
+        transition: transform 0.3s ease;
+        color: var(--accent);
+      }
+      .faq-item[aria-expanded="true"] .faq-item__icon {
+        transform: rotate(180deg);
+      }
+      .faq-item[aria-expanded="true"] {
+        border-color: rgba(252, 63, 29, 0.6);
+        background: rgba(31, 41, 55, 0.55);
+        box-shadow:
+          0 12px 40px 0 rgba(252, 63, 29, 0.25),
+          0 8px 32px 0 rgba(0, 0, 0, 0.45);
+      }
+      .faq-item__answer {
+        padding: 0 18px;
+        color: var(--muted);
+        font-size: 18px;
+        line-height: 1.5;
+        max-height: 0;
+        overflow: hidden;
+        transition:
+          max-height 0.4s ease,
+          padding 0.4s ease;
+        position: relative;
+        z-index: 1;
+      }
+      .faq-item[aria-expanded="true"] .faq-item__answer {
+        padding: 14px 18px;
+        max-height: 500px;
+      }
+      /* 🗺️ Карта */
+      .map {
+        padding: 28px 0;
+      }
+      .map__title {
+        font-size: 1.8rem;
+        margin-bottom: 16px;
+      }
+      .map__frameWrap {
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+      }
+      .map__frame {
+        display: block;
+        width: 100%;
+        height: 400px;
+        min-height: 320px;
+        border: 0;
+      }
+      .map__caption {
+        margin: 8px 0 10px;
+        color: var(--muted);
+      }
+      .map__directionsBtn {
+        display: inline-block;
+        background: var(--accent);
+        color: white;
+        padding: 10px 14px;
+        border-radius: 10px;
+        font-weight: 700;
+        text-decoration: none;
+      }
+      .map__directionsBtn:hover {
+        background: #e03512;
+      }
+      /* 📜 Футер */
+      .footer {
+        border-top: 1px solid var(--border);
+        background: #111827;
+        margin-top: 0;
+      }
+      .footer__inner {
+        padding: 14px 0;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .footer__copy,
+      .footer__contact {
+        margin: 0;
+        color: var(--muted);
+      }
+      .footer__contact a {
+        color: var(--accent);
+        text-decoration: none;
+        transition: opacity 0.2s ease;
+      }
+      .footer__contact a:hover {
+        opacity: 0.8;
+        text-decoration: underline;
+      }
+      .loading {
+        opacity: 0.6;
+        pointer-events: none;
+      }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
+      }
+      /* Адаптивность */
+      @media (max-width: 768px) {
+        .header {
+          padding: 24px 0 16px;
+        }
+        .header__title {
+          font-size: 2rem;
+        }
+        .ticker .ticker-content {
+          font-size: 20px;
+        }
+        .schedule__item {
+          grid-template-columns: 1fr;
+          text-align: center;
+          backdrop-filter: blur(15px) saturate(150%);
+          -webkit-backdrop-filter: blur(15px) saturate(150%);
+        }
+        .schedule__time {
+          margin-bottom: 8px;
+          font-size: 1.25rem;
+        }
+        .schedule__open {
+          margin-top: 10px;
+          width: 100%;
+        }
+        .modal__dialog {
+          width: 95vw;
+          padding: 12px;
+        }
+        .footer__inner {
+          flex-direction: column;
+          text-align: center;
+        }
+        .timer {
+          gap: 12px;
+          padding: 12px;
+        }
+        .timer__num {
+          font-size: 36px;
+        }
+        .timer__label {
+          font-size: 14px;
+        }
+        .timer__item {
+          min-width: 50px;
+        }
+        .carousel-expanded {
+          height: 320px;
+        }
+        .carousel-expanded__list {
+          gap: 12px;
+          padding: 12px 0;
+        }
+        .carousel-expanded__slide {
+          flex: 0 0 200px;
+          height: 260px;
+          background-position: center 20%;
+          transform: rotateY(-10deg) scale(0.85);
+        }
+        .carousel-expanded__slide.active {
+          flex: 0 0 280px;
+          height: 300px;
+          transform: rotateY(0) scale(1) translateY(-5px);
+        }
+        .carousel-expanded__content h4 {
+          font-size: 18px;
+        }
+        .carousel-expanded__content p {
+          font-size: 13px;
+        }
+      }
+      @media (max-width: 480px) {
+        .header__title {
+          font-size: 1.8rem;
+        }
+        .ticker .ticker-content {
+          font-size: 18px;
+        }
+        .timer__num {
+          font-size: 28px;
+        }
+        .timer__label {
+          font-size: 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="city-rain" id="cityRain"></div>
+    <header class="header">
+      <div class="container">
+        <div class="logo">
+          <img
+            src="img/red.png"
+            alt="Логотип мероприятия RED 2026"
+            width="200"
+            height="120"
+          />
+        </div>
+        <h1 class="header__title" id="eventTitle">RED 2026</h1>
+        <p class="header__tagline" id="eventTagline">Для умных и свободных</p>
+      </div>
+      <div class="timer" id="countdown" aria-live="polite">
+        <p
+          id="eventStartedMessage"
+          style="
+            display: none;
+            text-align: center;
+            font-size: 1.5rem;
+            color: var(--accent);
+            margin: 20px 0;
+          "
+        >
+          Мероприятие началось
+        </p>
+      </div>
+      <div class="ticker" aria-live="polite" aria-atomic="true">
+        <div class="ticker-wrapper">
+          <span class="ticker-content">
+            Добро пожаловать на весеннюю сессию RED 2026
+            <img
+              src="img/red.png"
+              alt=""
+              aria-hidden="true"
+              role="presentation"
+              loading="lazy"
+              width="80px"
+              height="36px"
+              style="
+                height: 36px;
+                margin: 0 5px;
+                vertical-align: middle;
+                filter: drop-shadow(0 0 6px rgb(255, 0, 34));
+              "
+            />
+            Добро пожаловать на весеннюю сессию RED 2026
+            <img
+              src="img/red.png"
+              alt=""
+              aria-hidden="true"
+              role="presentation"
+              loading="lazy"
+              width="80px"
+              height="36px"
+              style="
+                height: 36px;
+                margin: 0 5px;
+                vertical-align: middle;
+                filter: drop-shadow(0 0 6px rgb(255, 0, 34));
+              "
+            />
+            Добро пожаловать на весеннюю сессию RED 2026
+            <img
+              src="img/red.png"
+              alt=""
+              aria-hidden="true"
+              role="presentation"
+              loading="lazy"
+              width="80px"
+              height="36px"
+              style="
+                height: 36px;
+                margin: 0 5px;
+                vertical-align: middle;
+                filter: drop-shadow(0 0 6px rgb(255, 0, 34));
+              "
+            />
+            Добро пожаловать на весеннюю сессию RED 2026
+            <img
+              src="img/red.png"
+              alt=""
+              aria-hidden="true"
+              role="presentation"
+              loading="lazy"
+              width="80px"
+              height="36px"
+              style="
+                height: 36px;
+                margin: 0 5px;
+                vertical-align: middle;
+                filter: drop-shadow(0 0 6px rgb(255, 0, 34));
+              "
+            />
+          </span>
+          <span class="ticker-content">
+            Добро пожаловать на весеннюю сессию RED 2026
+            <img
+              src="img/red.png"
+              alt=""
+              aria-hidden="true"
+              role="presentation"
+              loading="lazy"
+              width="80px"
+              height="36px"
+              style="
+                height: 36px;
+                margin: 0 5px;
+                vertical-align: middle;
+                filter: drop-shadow(0 0 6px rgb(255, 0, 34));
+              "
+            />
+            Добро пожаловать на весеннюю сессию RED 2026
+            <img
+              src="img/red.png"
+              alt=""
+              aria-hidden="true"
+              role="presentation"
+              loading="lazy"
+              width="80px"
+              height="36px"
+              style="
+                height: 36px;
+                margin: 0 5px;
+                vertical-align: middle;
+                filter: drop-shadow(0 0 6px rgb(255, 0, 34));
+              "
+            />
+            Добро пожаловать на весеннюю сессию RED 2026
+            <img
+              src="img/red.png"
+              alt=""
+              aria-hidden="true"
+              role="presentation"
+              loading="lazy"
+              width="80px"
+              height="36px"
+              style="
+                height: 36px;
+                margin: 0 5px;
+                vertical-align: middle;
+                filter: drop-shadow(0 0 6px rgb(255, 0, 34));
+              "
+            />
+            Добро пожаловать на весеннюю сессию RED 2026
+            <img
+              src="img/red.png"
+              alt=""
+              aria-hidden="true"
+              role="presentation"
+              loading="lazy"
+              width="80px"
+              height="36px"
+              style="
+                height: 36px;
+                margin: 0 5px;
+                vertical-align: middle;
+                filter: drop-shadow(0 0 6px rgb(255, 0, 34));
+              "
+            />
+          </span>
+        </div>
+      </div>
+    </header>
+    <main class="main">
+      <div class="container">
+        <section class="schedule" aria-labelledby="scheduleTitle">
+          <div class="schedule__header">
+            <h2 class="schedule__title" id="scheduleTitle">Повестка сессии</h2>
+          </div>
+          <ul class="schedule__list" id="scheduleList"></ul>
+          <p class="schedule__empty" id="emptyState" hidden>
+            Ничего не найдено
+          </p>
+        </section>
+        <div class="modal" id="slotModal" aria-hidden="true">
+          <div class="modal__overlay" data-close="true"></div>
+          <div
+            class="modal__dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modalTitle"
+            aria-describedby="modalDesc"
+          >
+            <button
+              type="button"
+              class="modal__close"
+              id="modalClose"
+              aria-label="Закрыть"
+            >
+              ×
+            </button>
+            <div class="modal__content">
+              <h3 class="modal__title" id="modalTitle"></h3>
+              <div class="modal__desc" id="modalDesc"></div>
+              <div class="carousel-expanded">
+                <div class="carousel-expanded__list" id="carouselTrack"></div>
+              </div>
+              <div class="carousel-indicators" id="carouselIndicators"></div>
+            </div>
+          </div>
+        </div>
+        <section class="faq" aria-labelledby="faqHeading">
+          <h2 class="faq__title" id="faqHeading">Частые вопросы</h2>
+          <div class="faq__list" id="faqList"></div>
+        </section>
+        <section class="map" aria-labelledby="mapTitle">
+          <h2 class="map__title" id="mapTitle">Карта</h2>
+          <div class="map__frameWrap">
+            <iframe
+              class="map__frame"
+              title="Как добраться"
+              src="https://yandex.ru/map-widget/v1/?um=constructor%3A5f608a5ef6295aab46cee25859fd2bcfd4d9cd23b06d994273306d481bbf8d10&amp;source=constructor"
+              width="100%"
+              height="400"
+              frameborder="0"
+              referrerpolicy="no-referrer-when-downgrade"
+              loading="lazy"
+            ></iframe>
+          </div>
+          <p class="map__caption" id="mapTooltip">Альфа-Банк</p>
+          <a
+            class="map__directionsBtn"
+            id="directionsLink"
+            href="#"
+            target="_blank"
+            rel="noopener"
+            >Как добраться</a
+          >
+        </section>
+      </div>
+    </main>
+    <footer class="footer">
+      <div class="container footer__inner">
+        <p class="footer__copy">© <span id="yearCopy"></span> design by A.S.</p>
+        <p class="footer__contact">
+          Связь: <a href="mailto:dus@alfabank.ru">dus@alfabank.ru</a>
+        </p>
+      </div>
+    </footer>
+    <script>
+      // ✅ Константы
+      const EVENT_TITLE = "Весенняя сессия";
+      const EVENT_TAGLINE = "19 марта 2026";
+      const EVENT_START_ISO = "2026-03-19T09:30:00+03:00";
+      const EVENT_ADDRESS = "Москва, улица Маши Порываевой, д. 7сГ";
+      const MAP_TOOLTIP_TEXT = "АО Альфа-Банк";
+      const SCHEDULE_VISIBLE = true;
+      const PLACEHOLDER_PHOTO =
+        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='%23374151'/%3E%3Ctext x='50%25' y='53%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='14' fill='%23999'%3EФото%3C/text%3E%3C/svg%3E";
+      const SCHEDULE = [
+        {
+          id: "slot-1030-open",
+          start: "10:30",
+          end: "",
+          title: "Открытие сессии",
+          isBreak: false,
+          topics: [""],
+        },
+        {
+          id: "slot-1030-1100",
+          start: "10:30",
+          end: "11:00",
+          title: "Руководство Банка",
+          isBreak: false,
+          topics: [""],
+          speakers: [
+            {
+              id: "speaker-2",
+              name: "Владимир Верхошинский",
+              positionCompany: "Главный управляющий директор",
+              photoUrl:
+                "https://globalmsk.ru/usr/upload/upload-16932359720.jpg",
+            },
+            {
+              id: "speaker-3",
+              name: "Андрей Борисович Соколов",
+              positionCompany: "Председатель правления",
+              photoUrl:
+                "https://whoiswho.obs.ru-moscow-1.hc.sbercloud.ru/images/person/1873123/439374f9-a865-47ce-828f-0429b42e06e5.jpg",
+            },
+            {
+              id: "speaker-4",
+              name: "Олег Николаевич Сысуев",
+              positionCompany: "Председатель Совета директоров",
+              photoUrl:
+                "https://www.globalmsk.ru/usr/person/big-person-16795778851.png",
+            },
+          ],
+        },
+        {
+          id: "slot-1100-1105",
+          start: "11:00",
+          end: "11:05",
+          title: "Статусы исполнения поручений RED",
+          isBreak: false,
+          topics: [""],
+          speakers: [
+            {
+              id: "speaker-1",
+              name: "Елена Тятенкова",
+              positionCompany:
+                "Старший вице-президент, Руководитель департамента",
+              photoUrl:
+                "https://bosfera.ru/img/conf/2021/fincx21/tatenkova.jpg",
+            },
+          ],
+        },
+        {
+          id: "slot-1105-1205",
+          start: "11:05",
+          end: "12:05",
+          title: "Панельная дискуссия",
+          isBreak: false,
+          topics: [""],
+          speakers: [
+            {
+              id: "speaker-2",
+              name: "Владимир Верхошинский",
+              positionCompany: "Главный управляющий директор",
+              photoUrl:
+                "https://globalmsk.ru/usr/upload/upload-16932359720.jpg",
+            },
+
+            {
+              id: "speaker-6",
+              name: "Владимир Воейков",
+              positionCompany: "Директор крупного и среднего бизнеса",
+              photoUrl:
+                "https://news.store.rambler.ru/img/7262ed2b42c0927e4df4cc8de2479647?img-format=auto&img-1-resize=height:350,fit:max&img-2-filter=sharpen",
+            },
+            {
+              id: "speaker-7",
+              name: "Денис Осин",
+              positionCompany: "Директор малого и микробизнеса",
+              photoUrl: "https://alfabusiness.rbc.ru/images/persons/4@2x.jpg",
+            },
+            {
+              id: "speaker-5",
+              name: "Алексей Гиязов",
+              positionCompany: "Директор розничного бизнеса",
+              photoUrl:
+                "https://avatars.mds.yandex.net/get-entity_search/1993342/993685183/S600xU_2x",
+            },
+            {
+              id: "speaker-8",
+              name: "Марат Исмагулов",
+              positionCompany: "Директор по управлению человеческим капиталом",
+              photoUrl:
+                "https://static.tildacdn.com/tild3339-3934-4438-a363-373835303461/2.png",
+            },
+            {
+              id: "speaker-9",
+              name: "Михаил Березов",
+              positionCompany: "Главный финансовый директор",
+              photoUrl: "img/speakers/ber.png",
+            },
+          ],
+        },
+        {
+          id: "slot-1205-1235",
+          start: "12:05",
+          end: "12:35",
+          title: "Награждение лучших Регионов / Дивизионалов 2025",
+          isBreak: false,
+          topics: [""],
+          speakers: [
+            {
+              id: "speaker-2",
+              name: "Владимир Верхошинский",
+              positionCompany: "Главный управляющий директор",
+              photoUrl:
+                "https://globalmsk.ru/usr/upload/upload-16932359720.jpg",
+            },
+            {
+              id: "speaker-3",
+              name: "Андрей Борисович Соколов",
+              positionCompany: "Председатель правления",
+              photoUrl:
+                "https://whoiswho.obs.ru-moscow-1.hc.sbercloud.ru/images/person/1873123/439374f9-a865-47ce-828f-0429b42e06e5.jpg",
+            },
+            {
+              id: "speaker-1",
+              name: "Елена Тятенкова",
+              positionCompany:
+                "Старший вице-президент, Руководитель департамента",
+              photoUrl:
+                "https://bosfera.ru/img/conf/2021/fincx21/tatenkova.jpg",
+            },
+          ],
+        },
+        {
+          id: "slot-1235-1245",
+          start: "12:35",
+          end: "12:45",
+          title: "Фотосессия",
+          isBreak: false,
+          topics: [""],
+        },
+        {
+          id: "slot-1245-1400",
+          start: "12:45",
+          end: "14:00",
+          title: "Обед",
+          isBreak: true,
+          topics: [],
+          speakers: [],
+          location: "Столовая, Зона 'Е'",
+        },
+        {
+          id: "slot-1400-1440",
+          start: "14:00",
+          end: "14:40",
+          title: "РБ",
+          isBreak: false,
+          topics: ["Q&A - сессия"],
+          speakers: [
+            {
+              id: "speaker-5",
+              name: "Алексей Гиязов",
+              positionCompany: "Директор розничного бизнеса",
+              photoUrl:
+                "https://avatars.mds.yandex.net/get-entity_search/1993342/993685183/S600xU_2x",
+            },
+            {
+              id: "speaker-10",
+              name: "Александра Алтухова",
+              positionCompany: "Директор по розничным продажам",
+              photoUrl:
+                "https://job.alfabank.ru/files/2303280650_f9a5062e70e34e20bdaa1856d0576897.jpg",
+            },
+          ],
+        },
+        {
+          id: "slot-1440-1520",
+          start: "14:40",
+          end: "15:20",
+          title: "КБ",
+          isBreak: false,
+          topics: ["Q&A - сессия"],
+          speakers: [
+            {
+              id: "speaker-6",
+              name: "Владимир Воейков",
+              positionCompany: "Директор крупного и среднего бизнеса",
+              photoUrl:
+                "https://news.store.rambler.ru/img/7262ed2b42c0927e4df4cc8de2479647?img-format=auto&img-1-resize=height:350,fit:max&img-2-filter=sharpen",
+            },
+            {
+              id: "speaker-11",
+              name: "Евгений Монин",
+              positionCompany:
+                "Старший вице-президент, Руководитель департамента",
+              photoUrl:
+                "https://cdn.forbes.ru/forbes-static/c/1816x1022/new/2025/12/resized-image-17-694e4d3549b1f.webp",
+            },
+            {
+              id: "speaker-12",
+              name: "Денис Кутасов",
+              positionCompany:
+                "Старший вице-президент, Руководитель департамента",
+              photoUrl:
+                "https://im2.kommersant.ru/Issues.photo/TEMA2/2025/021/KMO_120929_07996_1_t241_190030.webp",
+            },
+          ],
+        },
+        {
+          id: "slot-1520-1600",
+          start: "15:20",
+          end: "16:00",
+          title: "ММБ",
+          isBreak: false,
+          topics: ["Q&A - сессия"],
+          speakers: [
+            {
+              id: "speaker-7",
+              name: "Денис Осин",
+              positionCompany: "Директор малого и микробизнеса",
+              photoUrl: "https://alfabusiness.rbc.ru/images/persons/4@2x.jpg",
+            },
+            {
+              id: "speaker-13",
+              name: "Кирилл Назимко",
+              positionCompany: "Директор по продажам малого и микробизнеса",
+              photoUrl: "img/speakers/naz.png",
+            },
+          ],
+        },
+        {
+          id: "slot-1600-1620",
+          start: "16:00",
+          end: "16:20",
+          title: "Кофе-брейк",
+          isBreak: true,
+          topics: [],
+          speakers: [],
+        },
+        {
+          id: "slot-1620-1640",
+          start: "16:20",
+          end: "16:40",
+          title: "Казначейство",
+          isBreak: false,
+          topics: ["Q&A - сессия"],
+          speakers: [
+            {
+              id: "speaker-14",
+              name: "Сергей Сидельников",
+              positionCompany: "Руководитель казначейства",
+              photoUrl: "img/speakers/sid.png",
+            },
+          ],
+        },
+        {
+          id: "slot-1640-1700",
+          start: "16:40",
+          end: "17:00",
+          title: "Сервис и взыскание",
+          isBreak: false,
+          topics: ["Q&A - сессия"],
+          speakers: [
+            {
+              id: "speaker-15",
+              name: "Нино Кодуа",
+              positionCompany: "Главный операционный директор",
+              photoUrl:
+                "https://fcongress.forbes.ru/assets/images/photos/yxf7k1.png",
+            },
+          ],
+        },
+        {
+          id: "slot-1700-1720",
+          start: "17:00",
+          end: "17:20",
+          title: "Маркетинг",
+          isBreak: false,
+          topics: ["Q&A - сессия"],
+          speakers: [
+            {
+              id: "speaker-16",
+              name: "Тимур Зулкарнаев",
+              positionCompany:
+                "Директор по маркетингу, дизайну и привлечению клиентов",
+              photoUrl:
+                "https://adindex.ru/assets/talks/content_images/2023_12/speaker_318430_1.JPG",
+            },
+          ],
+        },
+        {
+          id: "slot-1720-1740",
+          start: "17:20",
+          end: "17:40",
+          title: "Сеть",
+          isBreak: false,
+          topics: ["Q&A - сессия"],
+          speakers: [
+            {
+              id: "speaker-1",
+              name: "Елена Тятенкова",
+              positionCompany:
+                "Старший вице-президент, Руководитель департамента",
+              photoUrl:
+                "https://bosfera.ru/img/conf/2021/fincx21/tatenkova.jpg",
+            },
+          ],
+        },
+      ];
+      const FAQ_DATA = [
+        {
+          question: "Какой стиль одежды на мероприятии?",
+          answer:
+            "Стиль - Smart Casual. Это баланс элегантности и комфорта. Выбирайте утончённые базовые вещи: например, тёмные джинсы или чиносы с блейзером, однотонную рубашку, джемпер и пиджак. Завершат образ аккуратные кроссовки, лоферы или ботинки, создавая впечатление собранности без строгости классического костюма.",
+        },
+        {
+          question: "Где посмотреть фото после мероприятия?",
+          answer:
+            "Фотографии будут отправлены всем участникам конференции по корпоративной почте",
+        },
+        {
+          question: "Будут ли трансляции?",
+          answer:
+            "Да, трансляция будет только для приглашенных участников конференции, передача ссылки для подключения строго запрещена",
+        },
+        {
+          question: "Можно ли привести гостя?",
+          answer:
+            "Пересылать приглашение на конференцию или приходить с коллегами, которых нет в списках - нельзя",
+        },
+      ];
+      function el(tag, className, text) {
+        const node = document.createElement(tag);
+        if (className) node.className = className;
+        if (text != null) node.textContent = text;
+        return node;
+      }
+      function timeToMinutes(t) {
+        const p = String(t).split(":");
+        return (parseInt(p[0], 10) || 0) * 60 + (parseInt(p[1], 10) || 0);
+      }
+      function sortByStart(a, b) {
+        return timeToMinutes(a.start) - timeToMinutes(b.start);
+      }
+      function renderFAQ() {
+        const faqList = document.getElementById("faqList");
+        if (!faqList) return;
+        faqList.innerHTML = "";
+        FAQ_DATA.forEach((item, index) => {
+          const li = document.createElement("div");
+          li.className = "faq-item";
+          li.setAttribute("aria-expanded", "false");
+          const button = document.createElement("button");
+          button.className = "faq-item__question";
+          button.setAttribute("aria-expanded", "false");
+          button.setAttribute("aria-controls", `faq-answer-${index}`);
+          button.textContent = item.question;
+          const icon = document.createElement("span");
+          icon.className = "faq-item__icon";
+          icon.textContent = "▼";
+          button.appendChild(icon);
+          const answer = document.createElement("div");
+          answer.id = `faq-answer-${index}`;
+          answer.className = "faq-item__answer";
+          answer.textContent = item.answer;
+          button.addEventListener("click", () => {
+            const isExpanded = li.getAttribute("aria-expanded") === "true";
+            document.querySelectorAll(".faq-item").forEach((el) => {
+              el.setAttribute("aria-expanded", "false");
+            });
+            if (!isExpanded) li.setAttribute("aria-expanded", "true");
+          });
+          li.appendChild(button);
+          li.appendChild(answer);
+          faqList.appendChild(li);
+        });
+      }
+      function renderTimerState(diffMs) {
+        const countdownRoot = document.getElementById("countdown");
+        countdownRoot.innerHTML = "";
+        if (diffMs <= 0) {
+          countdownRoot.innerHTML = "<strong>Мероприятие началось</strong>";
+          return;
+        }
+        const totalSec = Math.floor(diffMs / 1000);
+        const days = Math.floor(totalSec / 86400);
+        const hours = Math.floor((totalSec % 86400) / 3600);
+        const mins = Math.floor((totalSec % 3600) / 60);
+        const secs = totalSec % 60;
+        function item(num, label) {
+          const box = el("div", "timer__item");
+          const n = el("span", "timer__num", String(num).padStart(2, "0"));
+          const l = el("span", "timer__label", label);
+          box.appendChild(n);
+          box.appendChild(l);
+          return box;
+        }
+        ["д", "ч", "м", "с"].forEach((_, i) => {
+          const val = [days, hours, mins, secs][i];
+          countdownRoot.appendChild(item(val, ["д", "ч", "м", "с"][i]));
+        });
+      }
+      function startTimerLoop() {
+        let timerInterval = null;
+        function tick() {
+          const now = new Date().getTime();
+          const target = new Date(EVENT_START_ISO).getTime();
+          if (isNaN(target)) {
+            console.error("❌ Некорректная дата события:", EVENT_START_ISO);
+            const countdownEl = document.getElementById("countdown");
+            if (countdownEl) {
+              countdownEl.innerHTML = "<strong>Ошибка даты</strong>";
+            }
+            if (timerInterval) clearInterval(timerInterval);
+            return;
+          }
+          renderTimerState(target - now);
+        }
+        tick();
+        timerInterval = setInterval(tick, 1000);
+        return () => {
+          if (timerInterval) clearInterval(timerInterval);
+        };
+      }
+      function filterSchedule() {
+        const items = document.querySelectorAll(".schedule__item");
+        const emptyState = document.getElementById("emptyState");
+        items.forEach((item) => {
+          item.classList.remove("hidden");
+        });
+        emptyState.hidden = items.length > 0;
+      }
+      function renderSchedule(slots) {
+        const scheduleList = document.getElementById("scheduleList");
+        if (!scheduleList) {
+          console.error("❌ #scheduleList не найден в DOM");
+          return;
+        }
+        scheduleList.innerHTML = "";
+        slots.sort(sortByStart);
+        slots.forEach((s) => {
+          const li = el(
+            "li",
+            `schedule__item${s.isBreak ? " schedule__item--break" : ""}`,
+          );
+          li.dataset.slotId = s.id;
+          const timeText = s.end ? `${s.start}–${s.end}` : s.start;
+          const time = el("div", "schedule__time", timeText);
+          li.appendChild(time);
+          const info = el("div", "schedule__info");
+          const title = el("p", "schedule__titleText", s.title || "Перерыв");
+          info.appendChild(title);
+          if (s.topics && s.topics.length && s.topics[0]) {
+            const topics = el("p", "schedule__topics", s.topics.join(" • "));
+            info.appendChild(topics);
+          }
+          li.appendChild(info);
+          // ✅ Кнопка "Подробнее" если есть спикеры ИЛИ location (например, обед)
+          if (
+            (!s.isBreak && s.speakers && s.speakers.length > 0) ||
+            (s.isBreak && s.location)
+          ) {
+            const btn = el("button", "schedule__open", "Подробнее");
+            btn.dataset.openSlot = s.id;
+            li.appendChild(btn);
+          }
+          scheduleList.appendChild(li);
+        });
+        filterSchedule();
+      }
+      function setupButtonFeedback() {
+        const buttons = document.querySelectorAll(".schedule__open");
+        buttons.forEach((btn) => {
+          let isPressed = false;
+          const pressEffect = () => {
+            if (!isPressed) {
+              isPressed = true;
+              btn.style.transform = "translateY(2px) scale(0.98)";
+              btn.style.backgroundColor = "#c92b0f";
+              btn.style.boxShadow = "0 1px 3px rgba(252, 63, 29, 0.4)";
+            }
+          };
+          const releaseEffect = () => {
+            if (isPressed) {
+              isPressed = false;
+              btn.style.transform = "";
+              btn.style.backgroundColor = "";
+              btn.style.boxShadow = "";
+            }
+          };
+          btn.addEventListener("touchstart", pressEffect, { passive: true });
+          btn.addEventListener("touchend", releaseEffect, { passive: true });
+          btn.addEventListener("touchcancel", releaseEffect, { passive: true });
+          btn.addEventListener("mousedown", pressEffect);
+          btn.addEventListener("mouseup", releaseEffect);
+          btn.addEventListener("mouseleave", releaseEffect);
+        });
+      }
+      function renderExpandedCarousel(speakersArray, track, indicators) {
+        // ❌ Убрали сброс className — он теперь управляется из openModal
+        track.innerHTML = "";
+        indicators.innerHTML = "";
+        let currentIndex = 0;
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+        const minSwipeDistance = 50;
+        speakersArray.forEach((sp, i) => {
+          const slide = el("div", "carousel-expanded__slide");
+          if (i === 0) slide.classList.add("active");
+          const bgImg = sp.photoUrl || PLACEHOLDER_PHOTO;
+          slide.style.backgroundImage = `url(${bgImg})`;
+          const content = document.createElement("div");
+          content.className = "carousel-expanded__content";
+          const nameEl = el("h4", null, sp.name || "Спикер");
+          const posEl = el("p", null, sp.positionCompany || "");
+          content.appendChild(nameEl);
+          content.appendChild(posEl);
+          slide.appendChild(content);
+          slide.addEventListener("click", () => {
+            goToSlide(i);
+          });
+          track.appendChild(slide);
+          const ind = el("div", "carousel-indicator");
+          if (i === 0) ind.classList.add("active");
+          ind.addEventListener("click", () => {
+            goToSlide(i);
+          });
+          indicators.appendChild(ind);
+        });
+        track.style.touchAction = "pan-y";
+        track.style.userSelect = "none";
+        track.addEventListener(
+          "touchstart",
+          (e) => {
+            const t = e.changedTouches[0];
+            touchStartX = t.screenX;
+            touchStartY = t.screenY;
+          },
+          { passive: true },
+        );
+        track.addEventListener(
+          "touchend",
+          (e) => {
+            const t = e.changedTouches[0];
+            touchEndX = t.screenX;
+            touchEndY = t.screenY;
+            handleSwipe();
+          },
+          { passive: true },
+        );
+        function handleSwipe() {
+          const dx = Math.abs(touchEndX - touchStartX);
+          const dy = Math.abs(touchEndY - touchStartY);
+          if (dx > minSwipeDistance && dx > dy) {
+            if (touchEndX < touchStartX) {
+              const newIndex = (currentIndex + 1) % speakersArray.length;
+              goToSlide(newIndex);
+            } else if (touchEndX > touchStartX) {
+              const newIndex =
+                (currentIndex - 1 + speakersArray.length) %
+                speakersArray.length;
+              goToSlide(newIndex);
+            }
+          }
+        }
+        function goToSlide(index) {
+          if (index === currentIndex) return;
+          const slides = track.querySelectorAll(".carousel-expanded__slide");
+          const dots = indicators.querySelectorAll(".carousel-indicator");
+          slides[currentIndex].classList.remove("active");
+          dots[currentIndex].classList.remove("active");
+          currentIndex = index;
+          slides[currentIndex].classList.add("active");
+          dots[currentIndex].classList.add("active");
+          slides[currentIndex].scrollIntoView({
+            behavior: "smooth",
+            block: "nearest",
+            inline: "center",
+          });
+        }
+      }
+      let modalTrapCleanup = null;
+      function openModal(slot) {
+        const modalRoot = document.getElementById("slotModal");
+        const modalTitle = document.getElementById("modalTitle");
+        const modalDesc = document.getElementById("modalDesc");
+        const track = document.getElementById("carouselTrack");
+        const indicators = document.getElementById("carouselIndicators");
+        const prevFocus = document.activeElement;
+        if (!modalRoot || !track || !indicators) {
+          console.error("❌ Один из элементов модального окна не найден");
+          return;
+        }
+        modalRoot.classList.add("is-open");
+        modalRoot.setAttribute("aria-hidden", "false");
+        modalTitle.textContent = `${slot.start}${slot.end ? "–" + slot.end : ""} • ${slot.title}`;
+        // ✅ Если это перерыв с location — показываем место
+        if (slot.isBreak && slot.location) {
+          modalDesc.textContent = slot.location;
+          track.style.display = "none";
+          indicators.style.display = "none";
+        } else {
+          const topicsText = (slot.topics || [])
+            .filter((t) => t && t.trim() !== "")
+            .join(", ");
+          modalDesc.textContent = topicsText;
+          track.style.display = "";
+          indicators.style.display = "";
+          const speakers = slot.speakers || [];
+          if (speakers.length > 0) {
+            // ✅ Устанавливаем класс carousel--single при одном спикере
+            if (speakers.length === 1) {
+              track.classList.add("carousel--single");
+            } else {
+              track.classList.remove("carousel--single");
+            }
+            renderExpandedCarousel(speakers, track, indicators);
+          }
+        }
+        const focusable = Array.from(
+          modalRoot.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+          ),
+        );
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        const trapTab = (e) => {
+          if (e.key === "Tab") {
+            if (e.shiftKey) {
+              if (document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+              }
+            } else {
+              if (document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+              }
+            }
+          } else if (e.key === "Escape") {
+            closeModals(() => prevFocus?.focus());
+          }
+        };
+        modalRoot.addEventListener("keydown", trapTab);
+        modalTrapCleanup = () => {
+          modalRoot.removeEventListener("keydown", trapTab);
+        };
+        if (first) first.focus();
+      }
+      function closeModals(thenCallback) {
+        const modal = document.getElementById("slotModal");
+        modal.classList.remove("is-open");
+        modal.setAttribute("aria-hidden", "true");
+        if (modalTrapCleanup) modalTrapCleanup();
+        if (typeof thenCallback === "function") setTimeout(thenCallback, 50);
+      }
+      // 🌆 Эффект "дождя городов" — оптимизированная версия
+      const cities = [
+        "МОСКВА",
+        "МОСКОВСКАЯ ОБЛАСТЬ",
+        "БЕЛГОРОД",
+        "КУРСК",
+        "ВОРОНЕЖ",
+        "КАЛУГА",
+        "ЛИПЕЦК",
+        "РЯЗАНЬ",
+        "ТВЕРЬ",
+        "ТУЛА",
+        "ОРЕЛ",
+        "ЯРОСЛАВЛЬ",
+        "КОСТРОМА",
+        "ИВАНОВО",
+        "БРЯНСК",
+        "СМОЛЕНСК",
+        "ТАМБОВ",
+        "ВЛАДИМИР",
+        "АРХАНГЕЛЬСК",
+        "СЫКТЫВКАР",
+        "КАЛИНИНГРАД",
+        "МУРМАНСК",
+        "ПСКОВ",
+        "ВЕЛИКИЙ НОВГОРОД",
+        "САНКТ-ПЕТЕРБУРГ",
+        "ПЕТРОЗАВОДСК",
+        "ВОЛОГДА",
+        "НИЖНИЙ НОВГОРОД",
+        "КИРОВ",
+        "ОРЕНБУРГ",
+        "ПЕНЗА",
+        "ПЕРМЬ",
+        "УФА",
+        "КАЗАНЬ",
+        "САМАРА",
+        "САРАТОВ",
+        "ИЖЕВСК",
+        "УЛЬЯНОВСК",
+        "САРАНСК",
+        "ЧЕБОКСАРЫ",
+        "ЙОШКАР-ОЛА",
+        "ВОЛГОГРАД",
+        "АСТРАХАНЬ",
+        "КРАСНОДАР",
+        "РОСТОВ-НА-ДОНУ",
+        "СТАВРОПОЛЬ",
+        "ЕКАТЕРИНБУРГ",
+        "ТЮМЕНЬ",
+        "ХМАО",
+        "КУРГАН",
+        "ЧЕЛЯБИНСК",
+        "БАРНАУЛ",
+        "ИРКУТСК",
+        "КЕМЕРОВО",
+        "КРАСНОЯРСК",
+        "НОВОСИБИРСК",
+        "ОМСК",
+        "ТОМСК",
+        "УЛАН-УДЭ",
+        "ВЛАДИВОСТОК",
+        "ЯКУТСК",
+        "ЮЖНО-САХАЛИНСК",
+        "ХАБАРОВСК",
+        "ЧИТА",
+        "БЛАГОВЕЩЕНСК",
+      ];
+      const container = document.getElementById("cityRain");
+      if (container) {
+        const MAX_DROPS = window.innerWidth < 768 ? 4 : 6;
+        const MIN_GAP_PX = window.innerWidth < 768 ? 100 : 140;
+        const activePositions = [];
+        const drops = new Set();
+        let isPageVisible = true;
+        document.addEventListener("visibilitychange", () => {
+          isPageVisible = !document.hidden;
+          if (isPageVisible && drops.size < MAX_DROPS) {
+            startCityRain();
+          }
+        });
+        function isOverlapping(leftPx) {
+          return activePositions.some(
+            (pos) => Math.abs(pos - leftPx) < MIN_GAP_PX,
+          );
+        }
+        function getRandomPosition() {
+          let attempts = 0;
+          let leftPx;
+          do {
+            leftPx = Math.random() * (window.innerWidth - 120);
+            attempts++;
+          } while (attempts < 30 && isOverlapping(leftPx));
+          activePositions.push(leftPx);
+          return leftPx;
+        }
+        function addCityDrop() {
+          if (!isPageVisible || drops.size >= MAX_DROPS) return;
+          const leftPx = getRandomPosition();
+          const drop = document.createElement("div");
+          drop.className = "city-drop";
+          drop.style.left = `${leftPx}px`;
+          drop.style.fontSize = `${14 + Math.random() * 6}px`;
+          drop.style.opacity = "0.6";
+          container.appendChild(drop);
+          drops.add(drop);
+          const city = cities[Math.floor(Math.random() * cities.length)];
+          let index = 0;
+          const letters = city.split("");
+          const typeInterval = setInterval(() => {
+            if (index < letters.length) {
+              const letter = document.createElement("div");
+              letter.className = "city-letter";
+              letter.textContent = letters[index];
+              letter.style.animationDelay = `${index * 0.1}s`;
+              drop.appendChild(letter);
+              index++;
+            } else {
+              clearInterval(typeInterval);
+            }
+          }, 100);
+          const riseDuration = 8 + Math.random() * 4;
+          drop.style.transition = `transform ${riseDuration}s linear, opacity 0.3s ease-out`;
+          const cleanup = () => {
+            const i = activePositions.indexOf(leftPx);
+            if (i > -1) activePositions.splice(i, 1);
+            drops.delete(drop);
+            if (drop.parentNode) drop.remove();
+            if (isPageVisible && drops.size < MAX_DROPS)
+              setTimeout(addCityDrop, 1500);
+          };
+          const handleTransitionEnd = (e) => {
+            if (e.propertyName === "transform") {
+              drop.removeEventListener("transitionend", handleTransitionEnd);
+              cleanup();
+            }
+          };
+          drop.addEventListener("transitionend", handleTransitionEnd);
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              drop.style.transform = "translateY(-30vh)";
+            });
+          });
+          setTimeout(
+            () => {
+              if (drops.has(drop)) {
+                drop.removeEventListener("transitionend", handleTransitionEnd);
+                cleanup();
+              }
+            },
+            (riseDuration + 1) * 1000,
+          );
+        }
+        function startCityRain() {
+          for (let i = 0; i < Math.min(MAX_DROPS, 3); i++) {
+            setTimeout(() => {
+              if (isPageVisible) addCityDrop();
+            }, i * 2000);
+          }
+        }
+        startCityRain();
+        window.addEventListener("resize", () => {
+          activePositions.length = 0;
+          drops.forEach((drop) => {
+            if (drop.parentNode) drop.remove();
+          });
+          drops.clear();
+          startCityRain();
+        });
+      }
+      // ✅ Инициализация приложения
+      function initApp() {
+        try {
+          const eventTitle = document.getElementById("eventTitle");
+          const eventTagline = document.getElementById("eventTagline");
+          const mapTooltip = document.getElementById("mapTooltip");
+          const yearCopy = document.getElementById("yearCopy");
+          const directionsLink = document.getElementById("directionsLink");
+          if (eventTitle) eventTitle.textContent = EVENT_TITLE;
+          if (eventTagline) eventTagline.textContent = EVENT_TAGLINE;
+          if (mapTooltip) mapTooltip.textContent = MAP_TOOLTIP_TEXT;
+          if (yearCopy) yearCopy.textContent = new Date().getFullYear();
+          if (directionsLink) {
+            directionsLink.href = `https://yandex.ru/maps/?text=${encodeURIComponent(EVENT_ADDRESS)}`;
+          }
+          startTimerLoop();
+          if (SCHEDULE_VISIBLE) {
+            renderSchedule(SCHEDULE);
+            const scheduleSection = document.querySelector(".schedule");
+            if (scheduleSection) {
+              scheduleSection.classList.add("active");
+            }
+          }
+          document.addEventListener("click", (e) => {
+            const btn = e.target.closest("[data-open-slot]");
+            if (btn) {
+              e.preventDefault();
+              const slot = SCHEDULE.find((s) => s.id === btn.dataset.openSlot);
+              if (slot) openModal(slot);
+            }
+          });
+          const modalClose = document.getElementById("modalClose");
+          const modalOverlay = document.querySelector(".modal__overlay");
+          if (modalClose)
+            modalClose.addEventListener("click", () => closeModals());
+          if (modalOverlay)
+            modalOverlay.addEventListener("click", () => closeModals());
+          renderFAQ();
+          setupButtonFeedback();
+        } catch (error) {
+          console.error("Ошибка при инициализации приложения:", error);
+        }
+      }
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initApp);
+      } else {
+        initApp();
+      }
+    </script>
+  </body>
+</html>
